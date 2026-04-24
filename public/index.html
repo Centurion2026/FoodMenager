@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoodManager — Personalizirani plan ishrane | Alan Catovic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-inner">
+      <div class="brand">
+        <span class="brand-mark">FM</span>
+        <span class="brand-name">FoodManager</span>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Promijeni temu">
+          <span id="themeIcon">🌙</span>
+        </button>
+      </div>
+      <h1 class="hero-title">Personalizirani<br><em>plan ishrane</em></h1>
+      <p class="hero-sub">Naučno zasnovani jelovnik prilagođen tebi — bosanska kuhinja, realni rezultati</p>
+      <p class="hero-author">Autor: <strong>Alan Catovic</strong></p>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ── PROTEIN CHEAT SHEET (uvijek vidljiv) ── -->
+    <section class="cheat-section">
+      <div class="cheat-header" onclick="toggleCheatSheet()" id="cheatHeader">
+        <div class="cheat-title">
+          <span class="cheat-icon">🥩</span>
+          <span>Protein cheat sheet — koliko proteina ima u kojoj namirnici?</span>
+        </div>
+        <span class="cheat-toggle-icon" id="cheatArrow">▼</span>
+      </div>
+      <div class="cheat-body" id="cheatBody"></div>
+    </section>
+
+    <!-- ── DNEVNI TRACKER ── -->
+    <section class="tracker-section" id="trackerSection">
+      <div class="tracker-header" onclick="toggleTracker()" id="trackerHeader">
+        <div class="cheat-title">
+          <span class="cheat-icon">📊</span>
+          <span>Dnevni kalorijski tracker</span>
+          <span class="tracker-today-badge" id="trackerTodayBadge"></span>
+        </div>
+        <span class="cheat-toggle-icon" id="trackerArrow">▼</span>
+      </div>
+      <div class="tracker-body" id="trackerBody">
+        <div class="tracker-inner">
+
+          <!-- Target unos -->
+          <div class="tracker-target-row">
+            <div class="tracker-target-field">
+              <label>Dnevni kalorijski cilj</label>
+              <div class="tracker-target-input-wrap">
+                <input type="number" id="trackerGoalKcal" placeholder="npr. 2200" min="500" max="6000">
+                <span class="tracker-kcal-unit">kcal</span>
+              </div>
+              <span class="tracker-target-hint">Automatski se popuni kad generiraš plan</span>
+            </div>
+            <div class="tracker-week-summary" id="trackerWeekSummary"></div>
+          </div>
+
+          <!-- 7 dana -->
+          <div class="tracker-days" id="trackerDays"></div>
+
+          <!-- Sedmični graf -->
+          <div class="tracker-chart-wrap">
+            <div class="tracker-chart-label">Sedmični pregled</div>
+            <div class="tracker-chart" id="trackerChart"></div>
+          </div>
+
+          <button class="btn-tracker-reset" onclick="resetTracker()">🗑️ Obriši sve unose</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FORMA ── -->
+    <section class="form-section" id="formSection">
+      <div class="section-label">01 — Tvoj profil</div>
+
+      <div class="form-wrap">
+        <!-- RED 1: Osnovni podaci -->
+        <div class="field-group">
+          <div class="field">
+            <label>Dob <span class="unit">god</span></label>
+            <input type="number" id="age" placeholder="25" min="10" max="120">
+          </div>
+          <div class="field">
+            <label>Visina <span class="unit">cm</span></label>
+            <input type="number" id="height" placeholder="175" min="100" max="250">
+          </div>
+          <div class="field">
+            <label>Težina <span class="unit">kg</span></label>
+            <input type="number" id="weight" placeholder="75" min="30" max="300">
+          </div>
+          <div class="field">
+            <label>Spol</label>
+            <select id="gender">
+              <option value="male">Muškarac</option>
+              <option value="female">Žena</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RED 2: Aktivnost, cilj, ishrana -->
+        <div class="field-group">
+          <div class="field field-lg">
+            <label>Razina aktivnosti</label>
+            <select id="activity">
+              <option value="sedentary">Sjedilački (bez vježbanja)</option>
+              <option value="light">Laka aktivnost (1–3x/sedmično)</option>
+              <option value="moderate" selected>Umjerena (3–5x/sedmično)</option>
+              <option value="active">Visoka aktivnost (6–7x/sedmično)</option>
+              <option value="very_active">Jako visoka (sportaš / fizički posao)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cilj</label>
+            <select id="goal">
+              <option value="maintain">Održavanje težine</option>
+              <option value="loss">Mršavljenje / Gubitak masti</option>
+              <option value="gain">Izgradnja mišića</option>
+              <option value="recomp">♻️ Rekompozicija tijela</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tip ishrane</label>
+            <select id="diet">
+              <option value="none">🍖 Omnivor (sve)</option>
+              <option value="vegetarian">🥚 Vegetarijanac</option>
+              <option value="vegan">🌱 Vegan</option>
+              <option value="lactose_free">🥛 Bez laktoze</option>
+              <option value="gluten_free">🌾 Bez glutena</option>
+              <option value="keto">🥑 Keto</option>
+              <option value="mediterranean">🫒 Mediteranski</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RED 3a: Ciljana težina (goal calculator) -->
+        <div class="field-group">
+          <div class="field field-lg">
+            <label>Ciljana težina <span class="unit">kg</span> <span class="optional">(za kalkulator trajanja)</span></label>
+            <input type="number" id="targetWeight" placeholder="npr. 75" min="30" max="300">
+          </div>
+          <div class="goal-calc-result hidden" id="goalCalcResult">
+            <div class="gcr-inner" id="goalCalcText"></div>
+          </div>
+        </div>
+
+        <!-- BMI / Tjelesna mast polja -->
+        <div class="field-group">
+          <div class="field">
+            <label>Obim struka <span class="unit">cm</span> <span class="optional">(za % tjelesne masti)</span></label>
+            <input type="number" id="waist" placeholder="npr. 85" min="40" max="200" oninput="calcBMILive()">
+          </div>
+          <div class="field">
+            <label>Obim vrata <span class="unit">cm</span> <span class="optional">(Navy formula)</span></label>
+            <input type="number" id="neck" placeholder="npr. 38" min="20" max="80" oninput="calcBMILive()">
+          </div>
+          <div class="field" id="hipField">
+            <label>Obim bokova <span class="unit">cm</span> <span class="optional">(za žene)</span></label>
+            <input type="number" id="hip" placeholder="npr. 95" min="40" max="200" oninput="calcBMILive()">
+          </div>
+          <div class="field">
+            <label>Sati treninga <span class="unit">h/dan</span> <span class="optional">(za vodu)</span></label>
+            <input type="number" id="trainingHours" placeholder="npr. 1.5" min="0" max="8" step="0.5" oninput="calcBMILive()">
+          </div>
+        </div>
+
+        <!-- BMI Live rezultat -->
+        <div id="bmiLiveResult" class="bmi-live-result hidden"></div>
+
+        <div class="field-group">
+          <div class="field field-xl">
+            <label>Posebna ograničenja <span class="optional">(opciono)</span></label>
+            <input type="text" id="restrictions" placeholder="npr. intolerancija na laktozu, alergija na orašaste plodove..." oninput="detectRestrictions()">
+          </div>
+          <div class="field field-xl">
+            <label>Zdravstvene napomene <span class="optional">(opciono)</span></label>
+            <input type="text" id="healthNotes" placeholder="npr. povišen kolesterol, migrene, dijabetes..." oninput="detectRestrictions()">
+          </div>
+        </div>
+
+        <!-- FEEDBACK: detekcija ograničenja -->
+        <div id="restrictionFeedback" class="restriction-feedback hidden"></div>
+
+        <!-- AI toggle -->
+        <div class="ai-row">
+          <label class="ai-toggle">
+            <input type="checkbox" id="useAI">
+            <span class="ai-knob"></span>
+            <span class="ai-label">
+              <strong>🤖 AI personalizacija jelovnika</strong>
+            </span>
+          </label>
+        </div>
+
+        <div id="formError" class="form-error hidden"></div>
+
+        <button class="btn-main" id="generateBtn" onclick="generate()">
+          <span>Generiraj moj plan</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── HISTORIJA PLANOVA ── -->
+    <section class="history-section" id="historySection">
+      <div class="history-header" onclick="toggleHistory()" id="historyHeader">
+        <div class="cheat-title">
+          <span class="cheat-icon">📋</span>
+          <span>Historija planova</span>
+          <span class="history-count-badge" id="historyCountBadge"></span>
+        </div>
+        <span class="cheat-toggle-icon" id="historyArrow">▼</span>
+      </div>
+      <div class="history-body" id="historyBody">
+        <div class="history-inner" id="historyList"></div>
+      </div>
+    </section>
+
+    <!-- ── LOADING ── -->
+    <div id="loading" class="loading hidden">
+      <div class="loading-inner">
+        <div class="loader-ring"></div>
+        <p id="loadingText">Računam nutritivne vrijednosti...</p>
+      </div>
+    </div>
+
+    <!-- ── REZULTATI ── -->
+    <div id="results" class="results hidden">
+
+      <!-- RECOMP info box -->
+      <div id="recompBadge" class="recomp-badge hidden">
+        <div class="recomp-icon">♻️</div>
+        <div>
+          <strong>Rekompozicija tijela</strong> — gubiš mast i gradiš mišiće istovremeno
+          <p>Jedeš na TDEE (maintenance) s visokim proteinima. Promjene su sporije ali trajne — idealno za početnike i osobe koje se vraćaju treningu.</p>
+        </div>
+      </div>
+      <div id="aiBadge" class="ai-badge hidden">
+        🤖 Plan generiran uz pomoć Grok AI — personaliziran za tvoj profil
+      </div>
+
+      <!-- PERSONALIZIRANA ANALIZA -->
+      <div id="personalAnalysisBox" class="personal-analysis hidden">
+        <div class="pa-icon">💬</div>
+        <div class="pa-content">
+          <strong>Napomena o tvojim posebnim zahtjevima</strong>
+          <p id="personalAnalysisText"></p>
+        </div>
+      </div>
+
+      <!-- VODA + BMI sekcija -->
+      <div class="results-row-2col">
+        <section class="result-section water-section" id="waterSection">
+          <div class="section-label">02b — Dnevna potreba za vodom</div>
+          <div id="waterContent"></div>
+        </section>
+        <section class="result-section bmi-section" id="bmiSection">
+          <div class="section-label">02c — BMI i tjelesna mast</div>
+          <div id="bmiContent"></div>
+        </section>
+      </div>
+
+      <!-- NUTRITIVNI SUMMARY -->
+      <section class="result-section">
+        <div class="section-label">02 — Tvoje ciljne brojke</div>
+        <div class="kcal-flow">
+          <div class="kcal-box">
+            <div class="kcal-label">BMR</div>
+            <div class="kcal-val" id="bmrVal">—</div>
+            <div class="kcal-unit">kcal bazalno</div>
+          </div>
+          <div class="kcal-arrow">→</div>
+          <div class="kcal-box">
+            <div class="kcal-label">TDEE</div>
+            <div class="kcal-val" id="tdeeVal">—</div>
+            <div class="kcal-unit">kcal s aktivnošću</div>
+          </div>
+          <div class="kcal-arrow">→</div>
+          <div class="kcal-box kcal-target">
+            <div class="kcal-label">Dnevni cilj</div>
+            <div class="kcal-val" id="targetVal">—</div>
+            <div class="kcal-unit" id="deficitLabel">kcal</div>
+          </div>
+        </div>
+
+        <div class="macro-row">
+          <div class="macro-pill protein">
+            <span class="macro-icon">🥩</span>
+            <div>
+              <span class="macro-val" id="proteinVal">—</span><span class="macro-g">g</span>
+              <div class="macro-name">Proteini</div>
+            </div>
+            <div class="macro-bar-wrap"><div class="macro-bar" id="proteinBar"></div></div>
+          </div>
+          <div class="macro-pill carbs">
+            <span class="macro-icon">🍞</span>
+            <div>
+              <span class="macro-val" id="carbsVal">—</span><span class="macro-g">g</span>
+              <div class="macro-name">Ugljikohidrati</div>
+            </div>
+            <div class="macro-bar-wrap"><div class="macro-bar" id="carbsBar"></div></div>
+          </div>
+          <div class="macro-pill fats">
+            <span class="macro-icon">🥑</span>
+            <div>
+              <span class="macro-val" id="fatsVal">—</span><span class="macro-g">g</span>
+              <div class="macro-name">Masti</div>
+            </div>
+            <div class="macro-bar-wrap"><div class="macro-bar" id="fatsBar"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRAVILA -->
+      <section class="result-section rules-section">
+        <div class="section-label">03 — Pravila koja moraju vrijediti</div>
+        <ul class="rules-list" id="rulesList"></ul>
+        <div class="meal-prep-tip" id="mealPrepTip"></div>
+      </section>
+
+      <!-- PREPORUČENE VJEŽBE -->
+      <section class="result-section" id="exerciseSection">
+        <div class="section-label">04 — Preporučene vježbe</div>
+        <div id="exerciseContent"></div>
+      </section>
+
+      <!-- 7-DNEVNI PLAN -->
+      <section class="result-section">
+        <div class="section-label-row">
+          <div class="section-label">05 — Sedmični jelovnik</div>
+          <div class="plan-actions">
+            <button class="btn-sm" onclick="regenerate()">🔄 Novi plan</button>
+            <button class="btn-sm" onclick="downloadExcel()">📊 Excel</button>
+            <button class="btn-sm" onclick="downloadText()">📄 Tekst</button>
+            <button class="btn-sm" onclick="downloadPDF()">📄 Spremi HTML</button>
+          </div>
+        </div>
+        <div class="week-grid" id="weekGrid"></div>
+      </section>
+
+      <!-- LISTA ZA KUPOVINU -->
+      <section class="result-section">
+        <div class="section-label">06 — Lista za kupovinu</div>
+        <div class="shopping-grid" id="shoppingGrid"></div>
+      </section>
+
+      <!-- RDA sekcija -->
+      <section class="result-section" id="rdaSection">
+        <div class="section-label">07 — Procjena vitamina i minerala (% RDA)</div>
+        <div id="rdaContent"></div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ABOUT SEKCIJA -->
+  <section class="about-section">
+    <div class="about-inner">
+      <div class="about-header">
+        <span class="about-tag">O aplikaciji</span>
+        <h2 class="about-title">Šta je FoodManager?</h2>
+        <p class="about-intro">Kompletan nutricionistički alat za personalizirane planove ishrane — od izračuna kalorija do praćenja napretka.</p>
+      </div>
+      <div class="about-grid">
+        <div class="about-block">
+          <div class="about-icon">🎯</div>
+          <h3>Personalizirani kalorijski plan</h3>
+          <p><strong>Mifflin-St Jeor formula</strong> za tačan BMR i TDEE. Uzima u obzir dob, visinu, težinu, spol i 5 razina aktivnosti. Automatsko skaliranje porcija obroka prema tvom kalorijskom cilju.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🍽️</div>
+          <h3>7-dnevni jelovnik s nutritivnim podacima</h3>
+          <p>5 obroka dnevno (Doručak → Užina → Ručak → Pred-trening → Večera) s <strong>tačnim kcal, proteinima, ugljikohidratima i mastima</strong> za svaki obrok i dnevni zbroj.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🥗</div>
+          <h3>7 tipova ishrane</h3>
+          <p>Omnivor, Vegetarijanac, Vegan, <strong>Bezlaktozni</strong>, <strong>Bez glutena</strong>, <strong>Keto</strong>, <strong>Mediteranski</strong> — svaki s prilagođenom bazom obroka, listom za kupovinu i posebnim pravilima.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">💧</div>
+          <h3>Kalkulator vode + dnevni tracker</h3>
+          <p>Izračun dnevne potrebe za vodom prema tjelesnoj težini i satima treninga. <strong>Tracker čaša vode</strong> s animiranim prikazom koliko si pio danas.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">📏</div>
+          <h3>BMI i % tjelesne masti</h3>
+          <p><strong>Indeks tjelesne mase</strong> s kategorijom i preporukom. <strong>Navy formula</strong> za procjenu % tjelesne masti na osnovu obima struka, vrata i visine.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🏋️</div>
+          <h3>Plan vježbanja po cilju</h3>
+          <p>Prilagođeni plan treninga za svaki cilj — mršavljenje, izgradnju mišića, održavanje ili rekompoziciju. Uključuje frekvenciju, trajanje i sedmični raspored.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🤖</div>
+          <h3>Grok AI personalizacija</h3>
+          <p>Opcijska <strong>AI personalizacija</strong> koja uzima u obzir alergije, intolerancije i zdravstvena stanja (kolesterol, migrene, dijabetes). AI generiše plan prilagođen tvom profilu s dnevnim nutricionističkim savjetima.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🛡️</div>
+          <h3>Detekcija ograničenja</h3>
+          <p>Automatski prepoznaje <strong>12 vrsta ograničenja</strong> iz slobodnog teksta (laktoza, gluten, orasi, riba, jaja, holesterol, dijabetes, migrene...) i prilagođava jelovnik u realnom vremenu.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🔬</div>
+          <h3>Procjena vitamina i minerala</h3>
+          <p>Gruba procjena <strong>dnevnog unosa vitamina i minerala</strong> u odnosu na preporučene dnevne doze (RDA) — vitamin C, D, B12, kalcij, gvožđe, magnezij, cink i omega-3.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">📊</div>
+          <h3>Tracker + historija planova</h3>
+          <p><strong>Dnevni kalorijski tracker</strong> s grafom za cijelu sedmicu. <strong>Historija zadnjih 5 planova</strong> sa mogućnošću ponovnog učitavanja ili poređenja.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">🔄</div>
+          <h3>Zamjena obroka s poređenjem</h3>
+          <p>Svaki obrok se može zamijeniti alternativama uz <strong>vizualnu usporedbu nutritivnih vrijednosti</strong> — vidiš razliku u kcal i makroima prije nego odabereš.</p>
+        </div>
+        <div class="about-block">
+          <div class="about-icon">📤</div>
+          <h3>Export: Excel, HTML, Tekst</h3>
+          <p>Plan se može snimiti kao <strong>Excel (.xlsx)</strong> s više tabova (sažetak, jelovnik, lista za kupovinu), <strong>HTML fajl</strong> spreman za printanje i dijeljenje, ili <strong>tekstualni fajl</strong>.</p>
+        </div>
+      </div>
+      <div class="about-footer">
+        <p>Razvio <strong>Alan Catovic</strong> · Aplikacija je informativnog karaktera i ne zamjenjuje savjet stručnog nutricioniste.</p>
+      </div>
+    </div>
+  </section>
+
+  </section>
+
+  <!-- MAKRONUTRIJENTI OBJAŠNJENJE -->
+  <section class="macro-edu-section">
+    <div class="macro-edu-inner">
+      <div class="about-header">
+        <span class="about-tag" style="color:#c4b5fd">Osnove prehrane</span>
+        <h2 class="about-title">Proteini, ugljikohidrati i masti —<br><em>zašto su svi važni?</em></h2>
+        <p class="about-intro">Svaki makronutrijent ima nezamijenjivu ulogu u tijelu. Nijedan nije "loš" — ključna je prava količina i kvalitet izvora.</p>
+      </div>
+
+      <div class="macro-edu-grid">
+
+        <!-- PROTEINI -->
+        <div class="macro-edu-card macro-edu-p">
+          <div class="mec-header">
+            <span class="mec-emoji">🥩</span>
+            <div>
+              <h3 class="mec-title">Proteini</h3>
+              <span class="mec-kcal">4 kcal po gramu</span>
+            </div>
+          </div>
+          <p class="mec-tagline">Gradivni materijal tijela</p>
+          <p class="mec-desc">Proteini su izgrađeni od aminokiselina i predstavljaju osnovu svake stanice u tijelu — od mišića i kostiju do hormona, enzima i antitijela. Tijelo ih ne može dugo skladištiti, pa je redovan unos kroz dan ključan.</p>
+          <div class="mec-roles">
+            <div class="mec-role"><span class="mec-role-icon">💪</span><div><strong>Izgradnja i obnova mišića</strong><p>Jedina namirnica koja direktno gradi mišićno tkivo. Bez dovoljno proteina, čak i intenzivan trening ne daje željene rezultate.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🔥</span><div><strong>Termički efekat — sagorijeva kalorije</strong><p>Tijelo troši 25–30% kalorija proteina samo na njihovu probavu — više nego kod ugljikohidrata (6–8%) ili masti (2–3%). Zato visokoproteinska ishrana pomaže mršavljenju.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">😌</span><div><strong>Sitost i kontrola apetita</strong><p>Proteini stimulišu hormone sitosti (GLP-1, PYY) i smanjuju ghrelin — hormon gladi. Doručak bogat proteinima smanjuje ukupan dnevni kalorijski unos.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🛡️</span><div><strong>Imunitet i hormoni</strong><p>Antitijela su proteini. Inzulin je protein. Mnogi enzimi probave su proteini. Bez adekvatnog unosa — imunitet slabi, hormoni se razreguliraju.</p></div></div>
+          </div>
+          <div class="mec-sources">
+            <span class="mec-sources-label">Najbolji izvori:</span>
+            <div class="mec-source-tags">
+              <span>Pileća prsa</span><span>Losos</span><span>Jaja</span><span>Grčki jogurt</span><span>Skyr</span><span>Tuna</span><span>Tofu</span><span>Whey</span>
+            </div>
+          </div>
+          <div class="mec-goal-box">
+            <strong>Koliko trebaš?</strong>
+            <p>Mršavljenje / održavanje: <strong>1,6–2,0g / kg tjelesne težine</strong><br>
+            Izgradnja mišića: <strong>2,0–2,4g / kg</strong><br>
+            Rekompozicija: <strong>2,0–2,5g / kg</strong><br>
+            Primjer: osoba od 75kg → 120–188g proteina dnevno</p>
+          </div>
+        </div>
+
+        <!-- UGLJIKOHIDRATI -->
+        <div class="macro-edu-card macro-edu-c">
+          <div class="mec-header">
+            <span class="mec-emoji">🍞</span>
+            <div>
+              <h3 class="mec-title">Ugljikohidrati</h3>
+              <span class="mec-kcal">4 kcal po gramu</span>
+            </div>
+          </div>
+          <p class="mec-tagline">Primarno gorivo tijela i mozga</p>
+          <p class="mec-desc">Ugljikohidrati su najbrži i najefikasniji izvor energije. Razgrađuju se na glukozu koja hrani mozak, mišiće i sve ostale organe. Nisu "loši" — ključna razlika je između jednostavnih (šećer, bijelo brašno) i kompleksnih (zobene pahuljice, kinoa, krompir).</p>
+          <div class="mec-roles">
+            <div class="mec-role"><span class="mec-role-icon">⚡</span><div><strong>Energija za trening</strong><p>Mišići koriste glikogen (pohranjena glukoza) kao primarno gorivo tokom intenzivnog treninga. Malo ugljikohidrata = malo glikogena = loš trening, slaba snaga, sporiji napredak.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🧠</span><div><strong>Fokus i rad mozga</strong><p>Mozak troši ~120g glukoze dnevno i ne može koristiti masne kiseline kao direktno gorivo. Premalo ugljikohidrata → magla u glavi, slaba koncentracija, loše raspoloženje.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🌿</span><div><strong>Vlakna i probava</strong><p>Kompleksni ugljikohidrati sadrže vlakna koja hrane crijevnu mikrobiotu, usporavaju apsorpciju šećera, snižavaju kolesterol i čuvaju zdravlje probavnog trakta.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🔄</span><div><strong>Oporavak mišića</strong><p>Nakon treninga, ugljikohidrati obnavljaju glikogenske rezerve i zajedno s proteinima ubrzavaju mišićni oporavak. Obrok proteina+ugljikohidrata postrening je zlatna kombinacija.</p></div></div>
+          </div>
+          <div class="mec-sources">
+            <span class="mec-sources-label">Kompleksni (preporučeni):</span>
+            <div class="mec-source-tags">
+              <span>Zobene pahuljice</span><span>Slatki krompir</span><span>Kinoa</span><span>Heljda</span><span>Integralni hljeb</span><span>Bulgur</span><span>Leća</span>
+            </div>
+          </div>
+          <div class="mec-goal-box">
+            <strong>Koliko trebaš?</strong>
+            <p>Ovisi o cilju i aktivnosti. Opći okvir: <strong>3–6g / kg tjelesne težine</strong><br>
+            Aktivan trening: viši kraj (4–6g/kg)<br>
+            Mršavljenje: niži kraj (2–3g/kg) — ali nikad ispod 100g/dan<br>
+            <em>Keto: svjesno ispod 50g/dan za ketogenu adaptaciju</em></p>
+          </div>
+        </div>
+
+        <!-- MASTI -->
+        <div class="macro-edu-card macro-edu-f">
+          <div class="mec-header">
+            <span class="mec-emoji">🥑</span>
+            <div>
+              <h3 class="mec-title">Masti</h3>
+              <span class="mec-kcal">9 kcal po gramu</span>
+            </div>
+          </div>
+          <p class="mec-tagline">Hormoni, mozak i vitalni procesi</p>
+          <p class="mec-desc">Masti su kalorički najgušći makronutrijent — ali i najvažniji za dugoročno zdravlje. Nisu uzrok debljine — višak kalorija jest. Zdravi masnoće su neophodni za funkcionisanje hormona, apsorpciju vitamina i zdravlje mozga. Razlika je između zdravih (maslinovo ulje, avokado, masna riba) i nezdravih (trans-masti, prerađene masti).</p>
+          <div class="mec-roles">
+            <div class="mec-role"><span class="mec-role-icon">⚖️</span><div><strong>Hormoni i reproduktivno zdravlje</strong><p>Testosteron, estrogen i progesteron se sintetiziraju iz kolesterola i masnih kiselina. Premalo masti u ishrani direktno smanjuje nivo polnih hormona — što utiče na mišićni rast, libido i plodnost.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🧬</span><div><strong>Apsorpcija vitamina A, D, E, K</strong><p>Ovi vitamini su topivi u mastima — tijelo ih može apsorbovati samo uz prisustvo masti. Obrok salate bez ulja = zanemarljiva apsorpcija beta-karotena i vitamina.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">🧠</span><div><strong>Zdravlje mozga</strong><p>60% mozga je građeno od masti, posebno DHA (omega-3 masna kiselina). Redovan unos masne ribe ili omega-3 suplemenata direktno poboljšava kognitivne funkcije i smanjuje upale.</p></div></div>
+            <div class="mec-role"><span class="mec-role-icon">❤️</span><div><strong>Kardiovaskularno zdravlje (prave masti)</strong><p>Omega-3 iz masne ribe (losos, skuša, sardine) snižavaju trigliceride, podiže HDL i smanjuje upale. Maslinovo ulje ekstra djevičansko je temelj mediteranske ishrane — najdugovječnije populacije na svijetu.</p></div></div>
+          </div>
+          <div class="mec-sources">
+            <span class="mec-sources-label">Zdrave masti:</span>
+            <div class="mec-source-tags">
+              <span>Maslinovo ulje</span><span>Avokado</span><span>Losos</span><span>Sardine</span><span>Orasi</span><span>Bademi</span><span>Chia</span><span>Lanene sjemenke</span>
+            </div>
+          </div>
+          <div class="mec-goal-box">
+            <strong>Koliko trebaš?</strong>
+            <p>Minimum: <strong>0,8g / kg tjelesne težine</strong> (ispod ovoga — hormonske smetnje)<br>
+            Optimalno: <strong>1,0–1,2g / kg</strong> za aktivan životni stil<br>
+            Keto: <strong>70–75% kalorija</strong> iz masti<br>
+            <em>Izbjegavaj: trans-masti (margarin, industrijska peciva, pržena hrana)</em></p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- USPOREDNA TABELA -->
+      <div class="macro-compare">
+        <h3 class="macro-compare-title">Brza usporedba makronutrijenata</h3>
+        <div class="macro-compare-table">
+          <div class="mct-header"><span></span><span>Proteini</span><span>Ugljikohidrati</span><span>Masti</span></div>
+          <div class="mct-row"><span class="mct-label">Kcal / gram</span><span>4 kcal</span><span>4 kcal</span><span>9 kcal</span></div>
+          <div class="mct-row"><span class="mct-label">Primarna uloga</span><span>Gradnja mišića</span><span>Energija</span><span>Hormoni</span></div>
+          <div class="mct-row"><span class="mct-label">Sitost</span><span>⭐⭐⭐</span><span>⭐⭐</span><span>⭐⭐⭐</span></div>
+          <div class="mct-row"><span class="mct-label">Brzina energije</span><span>Spora</span><span>Brza</span><span>Najsporija</span></div>
+          <div class="mct-row"><span class="mct-label">Može se izostaviti?</span><span class="mct-no">Ne — vitalni</span><span class="mct-warn">Djelimično (keto)</span><span class="mct-no">Ne — vitalni</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TERMINOLOGIJA -->
+  <section class="terms-section">
+    <div class="terms-inner">
+      <div class="about-header">
+        <span class="about-tag" style="color:#86efac">Rječnik pojmova</span>
+        <h2 class="about-title">Šta znače ove skraćenice?</h2>
+      </div>
+      <div class="terms-grid" id="termsGrid"></div>
+    </div>
+  </section>
+    FoodManager · Autor: Alan Catovic · Mifflin-St Jeor formula
+  </footer>
+
+<!-- SUBSTITUTION MODAL -->
+<div id="subModal" class="sub-modal hidden" onclick="closeSubModal(event)">
+  <div class="sub-modal-box">
+    <div class="sub-modal-head">
+      <span id="subModalTitle">Zamjene za obrok</span>
+      <button class="sub-close" onclick="closeSubModal()">✕</button>
+    </div>
+    <p class="sub-modal-desc" id="subModalDesc"></p>
+    <div class="sub-options" id="subOptions"></div>
+  </div>
+</div>
+
+</div><!-- .page -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
